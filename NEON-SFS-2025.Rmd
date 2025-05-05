@@ -506,7 +506,13 @@ before we begin to investigate questions that involve integrating the data.
 
 ### AOS Macroinvertebrate richness and diversity
 
-<span style="color: red;">STEPH, CAN YOU ADD A BLURB HERE</span>
+First, we remove the records that were collected outside of normal sampling 
+bouts as a grab sample, in cases where the NEON field ecologists saw interesting
+organisms that would not be captured using standard field sampling methods. 
+
+Next, we calculate macroinvertebrate abundance per square meter and taxon
+richness per sampling bout. This allows us to compare macroinvertebrate
+data among among different samplerTypes and habitatTypes. 
 
 ```{r aos-plot}
 # remove samples not associated with a bout
@@ -523,7 +529,7 @@ inv_abundance_summ <- inv_clean%>%
   dplyr::rename(collectDate=collectDate.x)%>%
   dplyr::group_by(siteID,collectDate,eventID,sampleID,samplerType,boutNumber)%>%
   dplyr::summarize(abun_M2_sum = sum(abun_M2, na.rm = TRUE))%>%
-  dplyr::group_by(siteID,collectDate,eventID,samplerType,boutNumber)%>%
+  dplyr::group_by(siteID,collectDate,eventID,samplerType,habitatType,boutNumber)%>%
   dplyr::summarise_each(funs(mean,sd,se=sd(.)/sqrt(n())))%>%
   dplyr::mutate(year=substr(eventID, 6,9),
                 yearBout=paste(year,"Bout",boutNumber, sep = "."))
