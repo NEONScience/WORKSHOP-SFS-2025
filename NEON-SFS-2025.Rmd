@@ -512,7 +512,16 @@ organisms that would not be captured using standard field sampling methods.
 
 Next, we calculate macroinvertebrate abundance per square meter and taxon
 richness per sampling bout. This allows us to compare macroinvertebrate
-data among among different samplerTypes and habitatTypes. 
+data among different samplerTypes and habitatTypes. 
+
+Sample types (e.g., surber, hand corer, kicknet) are strongly associated with 
+habitat (i.e., riffle, run, pool) and substrata. Are some NEON sites, like D04 
+CUPE, a surber sampler is used in two habitat types (riffle and run) because 
+all habitats have the same cobble substrata. Data users should look at the data
+to determine how they want to discriminate between sampler or habitat type.
+
+Below, for CUPE and GUIL, we will use a combination of samplerType and 
+habitatType.
 
 ```{r aos-plot}
 # remove samples not associated with a bout
