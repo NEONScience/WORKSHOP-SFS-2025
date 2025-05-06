@@ -527,16 +527,19 @@ inv_clean <- inv_clean[order(inv_clean$abun_M2, inv_clean$scientificName),]
 # summarize to get mean (+/- se) abundance by bout and sampler type
 inv_abundance_summ <- inv_clean%>%
   dplyr::rename(collectDate=collectDate.x)%>%
-  dplyr::group_by(siteID,collectDate,eventID,sampleID,samplerType,boutNumber)%>%
+  # dplyr::group_by(siteID,collectDate,eventID,sampleID,samplerType,boutNumber)%>%
+  dplyr::group_by(siteID,collectDate,eventID,sampleID,habitatType,boutNumber)%>%
   dplyr::summarize(abun_M2_sum = sum(abun_M2, na.rm = TRUE))%>%
-  dplyr::group_by(siteID,collectDate,eventID,samplerType,habitatType,boutNumber)%>%
+  # dplyr::group_by(siteID,collectDate,eventID,samplerType,boutNumber)%>%
+  dplyr::group_by(siteID,collectDate,eventID,habitatType,boutNumber)%>%
   dplyr::summarise_each(funs(mean,sd,se=sd(.)/sqrt(n())))%>%
   dplyr::mutate(year=substr(eventID, 6,9),
                 yearBout=paste(year,"Bout",boutNumber, sep = "."))
 
 # produce stacked plot to show trends within and across sites
 inv_abundance_plot <- inv_abundance_summ%>%
-  ggplot2::ggplot(aes(fill=samplerType, x=yearBout))+
+  # ggplot2::ggplot(aes(fill=samplerType, x=yearBout))+
+  ggplot2::ggplot(aes(fill=habitatType, x=yearBout))+
   ggplot2::geom_bar(aes(y=abun_M2_sum_mean),
                     position=position_dodge(0.8), stat="identity")+
   ggplot2::geom_errorbar(aes(ymin=abun_M2_sum_mean-abun_M2_sum_se, 
@@ -555,10 +558,12 @@ inv_abundance_plot
 # summarize to get mean (+/- se) richness by bout and sampler type
 inv_richness_summ <- inv_clean%>%
   dplyr::rename(collectDate=collectDate.x)%>%
-  dplyr::group_by(siteID,collectDate,eventID,sampleID,samplerType,boutNumber)%>%
+  # dplyr::group_by(siteID,collectDate,eventID,sampleID,samplerType,boutNumber)%>%
+  dplyr::group_by(siteID,collectDate,eventID,sampleID,habitatType,boutNumber)%>%
   dplyr::count(siteID)%>%
   dplyr::rename(count_per_samp = n)%>%
-  group_by(siteID,collectDate,eventID,samplerType,boutNumber)%>%
+  # group_by(siteID,collectDate,eventID,samplerType,boutNumber)%>%
+  group_by(siteID,collectDate,eventID,habitatType,boutNumber)%>%
   dplyr::summarize(mean_count = mean(count_per_samp),
                    n=n(),
                    sd_count = sd(count_per_samp),
@@ -568,7 +573,8 @@ inv_richness_summ <- inv_clean%>%
 
 # produce plot to show trends within and across sites
 inv_richness_plot <- inv_richness_summ%>%
-  ggplot2::ggplot(aes(fill=samplerType, y=mean_count, x=yearBout))+
+  # ggplot2::ggplot(aes(fill=samplerType, y=mean_count, x=yearBout))+
+  ggplot2::ggplot(aes(fill=habitatType, y=mean_count, x=yearBout))+
   ggplot2::geom_bar(position="dodge", stat="identity")+
   ggplot2::geom_errorbar(aes(ymin=mean_count-se, ymax=mean_count+se), 
                          width=0.4, colour="black", alpha=3.0, linewidth=0.2,
@@ -633,7 +639,8 @@ AOS_AIS_plot_CUPE <- CSD_30min%>%
   plotly::add_trace(data=inv_abundance_summ%>%
                       dplyr::filter(siteID=="CUPE"),
                     x=~collectDate,y=~abun_M2_sum_mean,
-                    split=~paste0("INV Abundance: ",samplerType),
+                    # split=~paste0("INV Abundance: ",samplerType),
+                    split=~paste0("INV Abundance: ",habitatType),
                     yaxis="y2",type="scatter",mode="markers",
                     error_y=~list(array=abun_M2_sum_se,
                                   color='darkorange'),
@@ -643,7 +650,8 @@ AOS_AIS_plot_CUPE <- CSD_30min%>%
   plotly::add_trace(data=inv_richness_summ%>%
                       dplyr::filter(siteID=="CUPE"),
                     x=~collectDate,y=~mean_count,
-                    split=~paste0("INV Richness: ",samplerType),
+                    # split=~paste0("INV Richness: ",samplerType),
+                    split=~paste0("INV Richness: ",habitatType),
                     yaxis="y3",type="scatter",mode="markers",
                     error_y=~list(array=se,
                                   color='darkgreen'),
@@ -722,7 +730,8 @@ AOS_AIS_plot_GUIL <- CSD_30min%>%
   plotly::add_trace(data=inv_abundance_summ%>%
                       dplyr::filter(siteID=="GUIL"),
                     x=~collectDate,y=~abun_M2_sum_mean,
-                    split=~paste0("INV Abundance: ",samplerType),
+                    # split=~paste0("INV Abundance: ",samplerType),
+                    split=~paste0("INV Abundance: ",habitatType),
                     yaxis="y2",type="scatter",mode="markers",
                     error_y=~list(array=abun_M2_sum_se,
                                   color='darkorange'),
@@ -732,7 +741,8 @@ AOS_AIS_plot_GUIL <- CSD_30min%>%
   plotly::add_trace(data=inv_richness_summ%>%
                       dplyr::filter(siteID=="GUIL"),
                     x=~collectDate,y=~mean_count,
-                    split=~paste0("INV Richness: ",samplerType),
+                    # split=~paste0("INV Richness: ",samplerType),
+                    split=~paste0("INV Richness: ",habitatType),
                     yaxis="y3",type="scatter",mode="markers",
                     error_y=~list(array=se,
                                   color='darkgreen'),
