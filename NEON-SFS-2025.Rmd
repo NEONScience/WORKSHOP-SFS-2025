@@ -98,6 +98,7 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 # install.packages("neonOS")
 # install.packages("tidyverse")
 # install.packages("plotly")
+# install.packages("vegan")
 ```
 
 ```{r load-packages}
@@ -109,6 +110,7 @@ library(neonUtilities)
 library(neonOS)
 library(tidyverse)
 library(plotly)
+library(vegan)
 ```
 
 The inputs to `loadByProduct()` control which data to download and how 
@@ -567,7 +569,80 @@ inv_abundance_plot <- inv_abundance_summ%>%
 inv_abundance_plot
 
 # summarize to get mean (+/- se) richness by bout and sampler type
-inv_richness_summ <- inv_clean%>%
+
+# extract sample metadata
+table_sample_info <- inv_clean %>%
+  select(sampleID, domainID, siteID, namedLocation, 
+         collectDate.x, eventID, boutNumber, 
+         habitatType, samplerType, benthicArea) %>%
+  distinct()
+
+# first, remove singletons and doubletons to create an occurrence summary table
+taxa_occurrence_summary <- inv_clean %>%
+  select(sampleID, acceptedTaxonID, scientificName) %>%
+  distinct() %>%
+  group_by(scientificName) %>%
+  summarize(occurrences = n())
+
+
+# filter out rare taxa that are only observed 1 or 2 times
+taxa_list_cleaned <- taxa_occurrence_summary %>%
+  filter(occurrences > 2)
+
+
+# filter observation table based on taxon list above
+inv_richness_summ <- inv_clean %>%
+  filter(scientificName %in%
+             taxa_list_cleaned$scientificName) 
+
+
+# select only site by species density info and remove duplicate records
+inv_richness_summ_long <- inv_richness_summ %>%
+  select(sampleID, acceptedTaxonID, scientificName, abun_M2) %>%
+  distinct() %>%
+  filter(!is.na(abun_M2))
+
+
+# pivot to wide format, sum multiple counts per sampleID
+inv_richness_summ_wide <- inv_richness_summ_long %>%
+  tidyr::pivot_wider(id_cols = sampleID, 
+                     names_from = scientificName,
+                     values_from = abun_M2,
+                     values_fill = list(abun_M2 = 0),
+                     values_fn = list(abun_M2 = sum)) %>%
+  column_to_rownames(var = "sampleID") %>%
+  round() #round to integer so that vegan functions will run
+
+
+# check col and row sums -- mins should all be > 0 for further analysis in vegan
+colSums(inv_richness_summ_wide) %>% min()
+rowSums(inv_richness_summ_wide) %>% min()
+
+
+# use the vegan package to calculate diversity indices abd merge into one table
+# with metadata
+inv_richness <- as.data.frame(specnumber(inv_richness_summ_wide)) %>% #more sensitive to rare taxa
+  rename(richness = `specnumber(inv_richness_summ_wide)`) 
+
+inv_richness_stats <- estimateR(inv_richness_summ_wide)
+
+inv_evenness <- as.data.frame(diversity(inv_richness_summ_wide) / log(specnumber(inv_richness_summ_wide))) %>% 
+  rename(evenness = `diversity(inv_richness_summ_wide)/log(specnumber(inv_richness_summ_wide))`)
+
+inv_shannon <- as.data.frame(diversity(inv_richness_summ_wide, index = "shannon")) %>% 
+  rename(shannon = `diversity(inv_richness_summ_wide, index = "shannon")`)
+
+inv_simpson <- as.data.frame(diversity(inv_richness_summ_wide, index = "simpson")) %>% #less sensitive to rare taxa
+  rename(simpson = `diversity(inv_richness_summ_wide, index = "simpson")`)
+
+inv_diversity_indices <- bind_cols(inv_richness, inv_evenness, inv_shannon, inv_simpson)
+rm(inv_richness, inv_evenness, inv_shannon, inv_simpson)
+
+inv_diversity_indices <- left_join(rownames_to_column(inv_diversity_indices), table_sample_info, by = c("rowname" = "sampleID")) %>%
+  rename(sampleID = rowname)
+
+
+inv_richness_summ <- inv_diversity_indices%>%
   dplyr::rename(collectDate=collectDate.x)%>%
   # dplyr::group_by(siteID,collectDate,eventID,sampleID,samplerType,boutNumber)%>%
   dplyr::group_by(siteID,collectDate,eventID,sampleID,habitatType,boutNumber)%>%
