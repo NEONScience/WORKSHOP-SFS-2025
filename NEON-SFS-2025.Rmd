@@ -519,7 +519,7 @@ data among different samplerTypes and habitatTypes.
 
 Sample types (e.g., surber, hand corer, kicknet) are strongly associated with 
 habitat (i.e., riffle, run, pool) and substrata. At some NEON sites, like D04 
-CUPE, a the same sampler is used in two habitat types (surber in riffle and run) 
+CUPE, the same sampler is used in two habitat types (surber in riffle and run) 
 because all habitats at the site have the same cobble substrata. Data users 
 should look at the data to determine how they want to discriminate between 
 sampler or habitat type.
@@ -641,37 +641,55 @@ rm(inv_richness, inv_evenness, inv_shannon, inv_simpson)
 inv_diversity_indices <- left_join(rownames_to_column(inv_diversity_indices), table_sample_info, by = c("rowname" = "sampleID")) %>%
   rename(sampleID = rowname)
 
+inv_diversity_indices_long <- inv_diversity_indices%>%
+  tidyr::pivot_longer(c(richness,evenness,shannon,simpson),
+                      names_to = "indexName",
+                      values_to = "indexValue")
 
-inv_richness_summ <- inv_diversity_indices%>%
+inv_diversity_summ <- inv_diversity_indices_long%>%
   dplyr::rename(collectDate=collectDate.x)%>%
-  # dplyr::group_by(siteID,collectDate,eventID,sampleID,samplerType,boutNumber)%>%
-  dplyr::group_by(siteID,collectDate,eventID,sampleID,habitatType,boutNumber)%>%
-  dplyr::count(siteID)%>%
-  dplyr::rename(count_per_samp = n)%>%
-  # group_by(siteID,collectDate,eventID,samplerType,boutNumber)%>%
-  group_by(siteID,collectDate,eventID,habitatType,boutNumber)%>%
-  dplyr::summarize(mean_count = mean(count_per_samp),
+  group_by(siteID,collectDate,eventID,habitatType,boutNumber,indexName)%>%
+  dplyr::summarize(mean = mean(indexValue),
                    n=n(),
-                   sd_count = sd(count_per_samp),
-                   se=sd_count/sqrt(n))%>%
+                   sd = sd(indexValue),
+                   se=sd/sqrt(n))%>%
   dplyr::mutate(year=substr(eventID, 6,9),
                 yearBout=paste(year,"Bout",boutNumber, sep = "."))
 
+# add in abundance
+names(inv_abundance_summ)
+names(inv_diversity_summ)
+
+inv_summ_allIndices <- inv_abundance_summ%>%
+  rename(mean=abun_M2_sum_mean,
+         sd=abun_M2_sum_sd,
+         se=abun_M2_sum_se)%>%
+  mutate(n=NA,
+         indexName="abundance")%>%
+  select(names(inv_diversity_summ))%>%
+  rbind(inv_diversity_summ)
+
+
 # produce plot to show trends within and across sites
-inv_richness_plot <- inv_richness_summ%>%
-  # ggplot2::ggplot(aes(fill=samplerType, y=mean_count, x=yearBout))+
-  ggplot2::ggplot(aes(fill=habitatType, y=mean_count, x=yearBout))+
-  ggplot2::geom_bar(position="dodge", stat="identity")+
-  ggplot2::geom_errorbar(aes(ymin=mean_count-se, ymax=mean_count+se), 
-                         width=0.4, colour="black", alpha=3.0, linewidth=0.2,
-                         position = position_dodge(0.8))+
-  ggplot2::facet_wrap(~siteID,ncol = 1)+
+inv_diversity_plot <- inv_summ_allIndices%>%
+  dplyr::filter(siteID=="CUPE")%>%
+  ggplot2::ggplot(aes(fill=habitatType, color=habitatType, y=mean, x=yearBout))+
+  # ggplot2::geom_boxplot()+
+  ggplot2::geom_point(position=position_dodge(0.5), size=2)+
+  # ggplot2::geom_line(position=position_dodge(0.8), stat="identity")+
+  # ggplot2::geom_bar(position="dodge", stat="identity")+
+  ggplot2::geom_errorbar(aes(ymin=mean-se, ymax=mean+se), 
+                         width=0.4, alpha=3.0, linewidth=1,
+                         position = position_dodge(0.5))+
+  ggplot2::facet_wrap(~indexName,
+                      scales="free_y",
+                      ncol = 1)+
   ggplot2::theme(axis.text.x = element_text(size = 10, angle = 30, 
                                             hjust = 1, vjust = 1))+
   labs(title="Mean number of macroinvertebrate taxa per bout",
        y= "Taxon Richness", x = "Bout")
 
-inv_richness_plot
+inv_diversity_plot
 
 ```
 
@@ -686,7 +704,7 @@ CSD_plot <- CSD_30min%>%
   ggplot2::ggplot(aes(x=roundDate,y=dischargeMean))+
   ggplot2::geom_line()+
   ggplot2::facet_wrap(~siteID,ncol = 1)+
-  ggplot2::scale_y_log10()+
+  # ggplot2::scale_y_log10()+
   labs(title="Continuous Discharge for Water Years 2022-2024",
        y= "Discharge (L/s)", x = "Date")
 
