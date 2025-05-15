@@ -1,16 +1,9 @@
 ---
-syncID: # What is this?
 title: "Linking NEON aquatic observational and instrument data to answer critical questions in aquatic ecology at the continental scale"
-description: "" # Add description
 dateCreated: 2025-04-28
 authors: Zachary Nickerson, Stephanie Parker, Bobby Hensley, Nick Harrison
 estimatedTime: 2 hours
 packagesLibraries: neonUtilities, ggplot2, lubridate, plyr
-topics: data-management, rep-sci
-languageTool: R, API
-code1: R/download-ais-data/download-NEON-AIS-data.R
-tutorialSeries:
-urlTitle: explore-neon-ais-data
 editor_options: 
   chunk_output_type: inline
 ---
@@ -35,12 +28,12 @@ SFS 2025 NEON Workshop GitHub repo:
 
 ## Tutorial
 
-This tutorial covers downloading NEON Aquatic Instrument System (AIS) and 
-Aquatic Observation System (AOS) data using the neonUtilities R package, as 
-well as basic instruction in beginning to explore and work with the downloaded
-data. This includes navigating data documentation, combining data within and 
-between data products, visualizing data, and conducting qualitative and 
-quantitative analysis with integrated AIS and AOS data. 
+This tutorial covers downloading NEON Aquatic Instrument Subsystem (AIS) and 
+Aquatic Observation Subsystem (AOS) data products using the `neonUtilities` R 
+package, as well as basic instruction in beginning to explore and work with the 
+downloaded data. This includes navigating data packages documentation, 
+summarizing data for plotting and analysis, combining data within and between 
+data products, and visualizing AIS and AOS data separately and together. 
 
 <div id="ds-objectives" markdown="1"
 
@@ -49,7 +42,7 @@ quantitative analysis with integrated AIS and AOS data.
 After completing this activity, you will be able to:
 
 * Download NEON AIS and AOS data using the `neonUtilities` package.
-* Understand downloaded data sets and load them into R for analyses.
+* Understand downloaded data packages and load them into R for analyses.
 * Understand the similarities and linkages between different NEON data products.
 * Join data sets within and between data products by standardized variables.
 * Plot instrumented and observational data in the same plotting field.
@@ -62,6 +55,10 @@ preferably, RStudio loaded on your computer.
 ### Install R Packages
 
 * **neonUtilities**: Basic functions for accessing NEON data
+* **neonOS**: Basic data wrangling for NEON Observational Data
+* **tidyverse**: Collection of R packages designed for data science
+* **plotly**: Tool for creating interactive, web-based visualizations
+* **vegan**: Functions for analyzing ecological data
 
 These packages are on CRAN and can be installed by 
 `install.packages()`.
@@ -69,8 +66,7 @@ These packages are on CRAN and can be installed by
 ### Additional Resources
 
 * <a href="https://github.com/NEONScience/NEON-Utilities/neonUtilities" target="_blank">GitHub repository for neonUtilities</a>
-
-</div>
+* <a href="https://github.com/NEONScience/NEON-OS-data-processing" target="_blank">GitHub repository for neonOS</a>
 
 ## Download Files and Load Directly to R: loadByProduct()
 
@@ -169,40 +165,40 @@ Now it's time to consider the NEON field site of interest. If not specified,
 the default will download a data product from all sites. The following are 
 4-letter site codes for NEON's 34 aquatics sites as of 2025:
 
-ARIK = Arikaree River CO        
-BARC = Barco Lake FL          
-BIGC = Upper Big Creek CA       
-BLDE = Black Deer Creek WY      
-BLUE = Blue River OK            
-BLWA = Black Warrior River AL 
-CARI = Caribou Creek AK         
-COMO = Como Creek CO          
-CRAM = Crampton Lake WI         
-CUPE = Rio Cupeyes PR           
-FLNT = Flint River GA           
-GUIL = Rio Yahuecas PR 
-HOPB = Lower Hop Brook MA       
-KING = Kings Creek KS         
-LECO = LeConte Creek TN         
-LEWI = Lewis Run VA             
-LIRO = Little Rock Lake WI      
-MART = Martha Creek WA
-MAYF = Mayfield Creek AL        
-MCDI = McDiffett Creek KS    
-MCRA = McRae Creek OR           
-OKSR = Oksrukuyik Creek AK      
-POSE = Posey Creek VA           
-PRIN = Pringle Creek TX       
-PRLA = Prairie Lake ND          
-PRPO = Prairie Pothole ND     
-REDB = Red Butte Creek UT       
-SUGG = Suggs Lake FL            
-SYCA = Sycamore Creek AZ        
-TECR = Teakettle Creek CA        
-TOMB = Lower Tombigbee River AL  
-TOOK = Toolik Lake AK         
-WALK = Walker Branch TN         
-WLOU = West St Louis Creek CO       
+* ARIK = Arikaree River CO        
+* BARC = Barco Lake FL          
+* BIGC = Upper Big Creek CA       
+* BLDE = Black Deer Creek WY      
+* BLUE = Blue River OK            
+* BLWA = Black Warrior River AL    
+* CARI = Caribou Creek AK         
+* COMO = Como Creek CO          
+* CRAM = Crampton Lake WI         
+* CUPE = Rio Cupeyes PR           
+* FLNT = Flint River GA           
+* GUIL = Rio Yahuecas PR      
+* HOPB = Lower Hop Brook MA       
+* KING = Kings Creek KS         
+* LECO = LeConte Creek TN         
+* LEWI = Lewis Run VA             
+* LIRO = Little Rock Lake WI      
+* MART = Martha Creek WA
+* MAYF = Mayfield Creek AL        
+* MCDI = McDiffett Creek KS    
+* MCRA = McRae Creek OR           
+* OKSR = Oksrukuyik Creek AK      
+* POSE = Posey Creek VA           
+* PRIN = Pringle Creek TX       
+* PRLA = Prairie Lake ND          
+* PRPO = Prairie Pothole ND     
+* REDB = Red Butte Creek UT       
+* SUGG = Suggs Lake FL            
+* SYCA = Sycamore Creek AZ        
+* TECR = Teakettle Creek CA        
+* TOMB = Lower Tombigbee River AL  
+* TOOK = Toolik Lake AK         
+* WALK = Walker Branch TN         
+* WLOU = West St Louis Creek CO       
 
 In this exercise, we will pull data from NEON Atlantic Neotropical Domain (D04).
 The aquatic sites in D04 are Rio Cupeyes (CUPE) and Rio Yahuecas (GUIL). Just 
@@ -226,6 +222,8 @@ on the following data products:
 
 * Macroinvertebrate collection ([DP1.20120.001](https://data.neonscience.org/data-products/DP1.20120.001))
 
+## Download AOS Data Products
+
 ```{r download-data-inv, results='hide'}
 # download data of interest - AOS - Macroinvertebrate collection
 inv <- neonUtilities::loadByProduct(dpID="DP1.20120.001",
@@ -245,7 +243,7 @@ inv <- neonUtilities::loadByProduct(dpID="DP1.20120.001",
 The data we've downloaded comes as an object that is a named list of objects. 
 To work with each of them, select them from the list using the `$` operator. 
 
-```{r names-waq}
+```{r names-inv}
 # view all components of the list
 names(inv)
 
@@ -272,9 +270,10 @@ If you'd like you can use the `$` operator to assign an object from an item in
 the list. If you prefer to extract each table from the list and work with it as 
 independent objects, which we will do, you can use the `list2env()` function. 
 
-```{r unlist-vars}
+```{r unlist-inv}
 # unlist the variables and add to the global environment
 list2env(inv,envir = .GlobalEnv)
+
 ```
 
 ### Explore: Data Citations
@@ -311,6 +310,7 @@ important information.
 ```{r view-vars}
 # view the entire dataframe in your R environment
 view(variables_20120)
+
 ```
 
 ### Explore: Dataframes
@@ -322,14 +322,10 @@ related datatables for a single data product.
 ```{r view-df}
 # view the entire dataframe in your R environment
 view(inv_fieldData)
+
 ```
 
-### Download AIS Data Products
-  
-Using what you've learned above, can you modify the code to download data for 
-the following data products?
-
-* DP4.00130.001: Continuous discharge
+## Download AIS Data Products
 
 ```{r download-data-csd, results='hide'}
 # download data of interest - AIS - Continuous discharge
@@ -344,22 +340,39 @@ csd <- neonUtilities::loadByProduct(dpID="DP4.00130.001",
                                     check.size = F)
 
 ```
+Let's see what files are included with an AIS data product download
 
-Let's unpack the AIS data products too:
+```{r names-csd}
+# view all components of the list
+names(csd)
 
-```{r unlist-remainder}
-list2env(csd, .GlobalEnv)
 ```
-
-Note that a few more objects were added to the Global Environment, including:
+This AIS data product contains 1 data table available in the basic package:
 
 * `csd_continuousDischarge`
   * Continuous discharge (streamflow) data at a 1 minute interval. Being a Level
   4 data product, this data has been cleaned and gap-filled.
 
-## Working with AOS Data
+Additionally, there are a couple of metadata file types included in AIS data 
+product downloads that are not included in AOS data product downloads:
 
-The `neonOS` R package was developed to aid in working with NEON Observational
+* **sensor_postions_xxxxx**: This file contains information about the 
+coordinates of each sensor, relative to a reference location.
+* **science_review_flags_xxxxx**: This file contains information on quality
+flags added to the data following expert review for data that are determined to 
+be suspect due to known adverse conditions not captured by automated flagging.
+
+Let's unpack the AIS data product to the environment:
+
+```{r unlist-csd}
+# unlist the variables and add to the global environment
+list2env(csd, .GlobalEnv)
+
+```
+
+## Wrangling AOS Data
+
+The `neonOS` R package was developed to aid in wrangling NEON Observational
 Subsystem (OS) data products. Two functions used in this exercise are:
 
 * `removeDups()`
@@ -439,7 +452,7 @@ Now, with field and taxonomy data joined. Individual taxon identifications are
 easily linked to field data such as collection latitude/longitude, habitat type,
 sampler type, and substratum class.
 
-## Working with AIS Data
+## Wrangling AIS Data
 
 ### Data from Different Sensor Locations (HOR)
 
@@ -448,7 +461,7 @@ These data are delivered together but you will frequently want to plot the data
 separately or only include data from one sensor in your analysis. NEON uses the 
 `horizontalPosition` variable in the data tables to describe which sensor 
 data is collected from. The `horizontalPosition` is always a three digit number 
-for AIS data. Non-shoreline HOR examples as of 2020 at AIS sites include:
+for AIS data.
 
 The Continuous discharge data product is derived from a single 
 `horizontalPosition`, which corresponds to the sensor co-located with the staff 
@@ -456,8 +469,7 @@ gauge at the site. This is also the location at which all empirical discharge
 measurements are taken.
 
 Let's see from which `horizontalPosition` the Continuous discharge data is
-published, and see if the other AIS data products we downloaded have data at
-that same position.
+published.
 
 ```{r csd-hor}
 # use dplyr from the tidyverse collection to get all unique horizontal positions
@@ -481,32 +493,32 @@ At GUIL, until 2022-12-12, the continuous discharge data were published from the
 110 position. On 2022-12-12, the position changed to 132, which is defined as 
 'stand-alone water level sensors at downstream (S2) locations at stream sites.'
 
-### Average continuous discharge to 30-min interval
+### Average continuous discharge to 15-min interval
 
 To make the continuous discharge data easier to work with for this exercise, 
-let's use different packages from the `tidyverse` collection to create a 30-min 
+let's use different packages from the `tidyverse` collection to create a 15-min 
 averaged table.
 
-```{r 30-min-summ}
-# 30-min average of continuous discharge data
-CSD_30min <- csd_continuousDischarge%>%
-  dplyr::mutate(roundDate=lubridate::round_date(endDate,"30 min"))%>%
+```{r 15-min-summ}
+# 15-min average of continuous discharge data
+CSD_15min <- csd_continuousDischarge%>%
+  dplyr::mutate(roundDate=lubridate::round_date(endDate,"15 min"))%>%
   dplyr::group_by(siteID,roundDate)%>%
   dplyr::summarise(dischargeMean=mean(continuousDischarge,na.rm=T),
                    dischargeCountQF=sum(dischargeFinalQFSciRvw,na.rm = T))
 
 ```
 
-Notice that we included a summation of the quality flag (QF; binary: 1 = flag, 
-0 = no flag) fields in the new table.
+Notice that we included a summation of the science review quality flag 
+(QFSciRvw; binary: 1 = flag, 0 = no flag) fields in the new table.
 
 ## Plot Data
 
-Now that we have managed the data a bit to make it cleaner and easier to work
-with, let's make some initial plots to see the AOS and AIS data separately 
-before we begin to investigate questions that involve integrating the data.
+Now that we have wrangled the data a bit to make it easier to work with, let's 
+make some initial plots to see the AOS and AIS data separately before we begin 
+to investigate questions that involve integrating the data.
 
-### AOS Macroinvertebrate richness and diversity
+### AOS Macroinvertebrate abundance and richness
 
 First, we remove the records collected outside of normal sampling bouts as 
 a grab sample. In cases where the NEON field ecologists see interesting
@@ -515,139 +527,180 @@ they can collect a grab sample to be identified by the expert taxonomists.
 
 Next, we calculate macroinvertebrate abundance per square meter and taxon
 richness per sampling bout. This allows us to compare macroinvertebrate
-data among different samplerTypes and habitatTypes. 
+data among different samplerTypes and habitatTypes.
 
-Sample types (e.g., surber, hand corer, kicknet) are strongly associated with 
+We use the `vegan` R package to calculate richness, evenness, and both the 
+Shannon and Simpson biodiversity indicies in this exercise. Though we only 
+focus on richness in the plots, users are encouraged to alter the variables
+to view other indices. For a more detailed dive into NEON biodiversity analyses,
+see the following NEON tutorial:
+
+[Explore and work with NEON biodiversity data from aquatic ecosystems](https://www.neonscience.org/resources/learning-hub/tutorials/aquatic-diversity-macroinvertebrates)
+
+Sampler types (e.g., surber, hand corer, kicknet) are strongly associated with 
 habitat (i.e., riffle, run, pool) and substrata. At some NEON sites, like D04 
 CUPE, the same sampler is used in two habitat types (surber in riffle and run) 
 because all habitats at the site have the same cobble substrata. Data users 
 should look at the data to determine how they want to discriminate between 
 sampler or habitat type.
 
-Below, for CUPE and GUIL, we will use a combination of samplerType and 
-habitatType.
+For this exercise, we split abundance and richness by `habitatType`. To split 
+instead by `samplerType`, simply do a find+replace of 
+'habitatType' -> 'samplerType' throughout the code.
 
 ```{r aos-plot}
-# remove samples not associated with a bout
-inv_clean <- inv_fieldTaxJoined%>%
+### SHOW BREAKDOWN OF SAMPLER TYPE BY HABITAT TYPE AT EACH SITE ###
+
+sampler_habitat_summ <- inv_fieldTaxJoined%>%
+  dplyr::distinct(siteID,samplerType,habitatType)
+sampler_habitat_summ  
+
+### PLOT ABUNDANCE ###
+
+# using the `tidyverse` collection, we can clean the data in one piped function
+inv_abundance_summ <- inv_fieldTaxJoined%>%
+  # remove events when no samples were collected (samplingImpractial)
+  # remove samples not associated with a bout
   dplyr::filter(is.na(samplingImpractical)
-                &!grepl("GRAB|BRYOZOAN",sampleID))
-
-# calculate abundance - total count per m2
-inv_clean$abun_M2 <- inv_clean$estimatedTotalCount/inv_clean$benthicArea
-inv_clean <- inv_clean[order(inv_clean$abun_M2, inv_clean$scientificName),]
-
-# summarize to get mean (+/- se) abundance by bout and sampler type
-inv_abundance_summ <- inv_clean%>%
+                &!grepl("GRAB|BRYOZOAN",sampleID))%>%
+  
+  # calculate abundance (individuals per m2^)
+  dplyr::mutate(abun_M2=estimatedTotalCount/benthicArea)%>%
+  
+  # clean `collectDate` column header
   dplyr::rename(collectDate=collectDate.x)%>%
-  # dplyr::group_by(siteID,collectDate,eventID,sampleID,samplerType,boutNumber)%>%
+  
+  # first, group including `sampleID` and calculate total abundance per sample
   dplyr::group_by(siteID,collectDate,eventID,sampleID,habitatType,boutNumber)%>%
   dplyr::summarize(abun_M2_sum = sum(abun_M2, na.rm = TRUE))%>%
-  # dplyr::group_by(siteID,collectDate,eventID,samplerType,boutNumber)%>%
+  
+  # second, group excluding `sampleID` to summarize by each bout (`eventID`)
   dplyr::group_by(siteID,collectDate,eventID,habitatType,boutNumber)%>%
+  
+  # summarize to get mean (+/- se) abundance by bout and sampler type
   dplyr::summarise_each(funs(mean,sd,se=sd(.)/sqrt(n())))%>%
+  
+  # get categorical variable to sort bouts chronologically
   dplyr::mutate(year=substr(eventID, 6,9),
                 yearBout=paste(year,"Bout",boutNumber, sep = "."))
 
 # produce stacked plot to show trends within and across sites
 inv_abundance_plot <- inv_abundance_summ%>%
-  # ggplot2::ggplot(aes(fill=samplerType, x=yearBout))+
-  ggplot2::ggplot(aes(fill=habitatType, x=yearBout))+
-  ggplot2::geom_bar(aes(y=abun_M2_sum_mean),
-                    position=position_dodge(0.8), stat="identity")+
+  ggplot2::ggplot(aes(fill=habitatType, color=habitatType, y=abun_M2_sum_mean, x=yearBout))+
+  ggplot2::geom_point(position=position_dodge(0.5), size=2)+
   ggplot2::geom_errorbar(aes(ymin=abun_M2_sum_mean-abun_M2_sum_se, 
-                             ymax=abun_M2_sum_mean+abun_M2_sum_se),
-                         width=0.4,colour="black",alpha=3.0,linewidth=0.2,
-                         position=position_dodge(0.8))+
+                             ymax=abun_M2_sum_mean+abun_M2_sum_se), 
+                         width=0.4, alpha=3.0, linewidth=1,
+                         position = position_dodge(0.5))+
   ggplot2::facet_wrap(~siteID,ncol = 1,scales="free_y")+
   ggplot2::theme(axis.text.x = element_text(size = 10, angle = 30, 
                                             hjust = 1, vjust = 1))+
   ggplot2::labs(title = "Mean macroinvertebrates per square meter",
                 y = "Abundance Per Square Meter",
                 x = "Bout")
-
 inv_abundance_plot
 
-# summarize to get mean (+/- se) richness by bout and sampler type
+### PLOT RICHNESS ###
+
+inv_richness_clean <- inv_fieldTaxJoined%>%
+  # remove events when no samples were collected (samplingImpractial)
+  # remove samples not associated with a bout
+  dplyr::filter(is.na(samplingImpractical)
+                &!grepl("GRAB|BRYOZOAN",sampleID))%>%
+  # clean `collectDate` column header
+  dplyr::rename(collectDate=collectDate.x)
 
 # extract sample metadata
-table_sample_info <- inv_clean %>%
-  select(sampleID, domainID, siteID, namedLocation, 
-         collectDate.x, eventID, boutNumber, 
-         habitatType, samplerType, benthicArea) %>%
-  distinct()
+inv_sample_info <- inv_richness_clean%>%
+  dplyr::select(sampleID, domainID, siteID, namedLocation, 
+                collectDate, eventID, boutNumber, 
+                habitatType, samplerType, benthicArea)%>%
+  dplyr::distinct()
 
-# first, remove singletons and doubletons to create an occurrence summary table
-taxa_occurrence_summary <- inv_clean %>%
-  select(sampleID, acceptedTaxonID, scientificName) %>%
-  distinct() %>%
-  group_by(scientificName) %>%
-  summarize(occurrences = n())
+# filter out rare taxa: only observed 1 (singleton) or 2 (doubleton) times
+inv_rare_taxa <- inv_richness_clean%>%
+  dplyr::distinct(sampleID, acceptedTaxonID, scientificName)%>%
+  dplyr::group_by(scientificName)%>%
+  dplyr::summarize(occurrences = n())%>%
+  dplyr::filter(occurrences > 2)
 
+# filter richness table based on taxon list excluding singletons and doubletons
+inv_richness_clean <- inv_richness_clean %>%
+  dplyr::filter(scientificName%in%inv_rare_taxa$scientificName) 
 
-# filter out rare taxa that are only observed 1 or 2 times
-taxa_list_cleaned <- taxa_occurrence_summary %>%
-  filter(occurrences > 2)
-
-
-# filter observation table based on taxon list above
-inv_richness_summ <- inv_clean %>%
-  filter(scientificName %in%
-             taxa_list_cleaned$scientificName) 
-
-
-# select only site by species density info and remove duplicate records
-inv_richness_summ_long <- inv_richness_summ %>%
-  select(sampleID, acceptedTaxonID, scientificName, abun_M2) %>%
-  distinct() %>%
-  filter(!is.na(abun_M2))
-
-
-# pivot to wide format, sum multiple counts per sampleID
-inv_richness_summ_wide <- inv_richness_summ_long %>%
+# create a matrix of taxa by sampleID
+inv_richness_clean_wide <- inv_richness_clean %>%
+  # subset to unique combinations of `sampleID` and `scientificName`
+  dplyr::distinct(sampleID,scientificName,.keep_all = T)%>%
+  
+  # remove any records with no abundance data
+  dplyr::mutate(abun_M2=estimatedTotalCount/benthicArea)%>%
+  filter(!is.na(abun_M2))%>%
+  
+  # pivot to wide format, sum multiple counts per sampleID
   tidyr::pivot_wider(id_cols = sampleID, 
                      names_from = scientificName,
                      values_from = abun_M2,
                      values_fill = list(abun_M2 = 0),
                      values_fn = list(abun_M2 = sum)) %>%
-  column_to_rownames(var = "sampleID") %>%
-  round() #round to integer so that vegan functions will run
+  tibble::column_to_rownames(var = "sampleID") %>%
+  
+  #round to integer so that vegan functions will run
+  round()
 
+# code check - check col and row sums
+# mins should all be > 0 for further analysis in vegan
+if(colSums(inv_richness_clean_wide) %>% min()==0){
+  stop("Column sum is 0: do not proceed with richness analysis!")
+}
+if(rowSums(inv_richness_clean_wide) %>% min()==0){
+  stop("Row sum is 0: do not proceed with richness analysis!")
+}
 
-# check col and row sums -- mins should all be > 0 for further analysis in vegan
-colSums(inv_richness_summ_wide) %>% min()
-rowSums(inv_richness_summ_wide) %>% min()
+# use the `vegan` package to calculate diversity indices
 
+# calculate richness
+inv_richness <- as.data.frame(
+  vegan::specnumber(inv_richness_clean_wide)
+  )
+names(inv_richness) <- "richness"
 
-# use the vegan package to calculate diversity indices abd merge into one table
-# with metadata
-inv_richness <- as.data.frame(specnumber(inv_richness_summ_wide)) %>% #more sensitive to rare taxa
-  rename(richness = `specnumber(inv_richness_summ_wide)`) 
+inv_richness_stats <- vegan::estimateR(inv_richness_clean_wide)
 
-inv_richness_stats <- estimateR(inv_richness_summ_wide)
+# calculate evenness
+inv_evenness <- as.data.frame(
+  vegan::diversity(inv_richness_clean_wide)/
+    log(vegan::specnumber(inv_richness_clean_wide))
+  )
+names(inv_evenness) <- "evenness"
 
-inv_evenness <- as.data.frame(diversity(inv_richness_summ_wide) / log(specnumber(inv_richness_summ_wide))) %>% 
-  rename(evenness = `diversity(inv_richness_summ_wide)/log(specnumber(inv_richness_summ_wide))`)
+# calculate shannon index
+inv_shannon <- as.data.frame(
+  vegan::diversity(inv_richness_clean_wide, index = "shannon")
+  )
+names(inv_shannon) <- "shannon"
 
-inv_shannon <- as.data.frame(diversity(inv_richness_summ_wide, index = "shannon")) %>% 
-  rename(shannon = `diversity(inv_richness_summ_wide, index = "shannon")`)
+# calculate simpson index
+inv_simpson <- as.data.frame(
+  vegan::diversity(inv_richness_clean_wide, index = "simpson")
+  )
+names(inv_simpson) <- "simpson"
 
-inv_simpson <- as.data.frame(diversity(inv_richness_summ_wide, index = "simpson")) %>% #less sensitive to rare taxa
-  rename(simpson = `diversity(inv_richness_summ_wide, index = "simpson")`)
+# create a single data frame
+inv_diversity_indices <- cbind(inv_richness, inv_evenness, inv_shannon, inv_simpson)
 
-inv_diversity_indices <- bind_cols(inv_richness, inv_evenness, inv_shannon, inv_simpson)
-rm(inv_richness, inv_evenness, inv_shannon, inv_simpson)
+# bring in the metadata table created earlier
+inv_diversity_indices <- dplyr::left_join(
+  tibble::rownames_to_column(inv_diversity_indices),
+  inv_sample_info,
+  by = c("rowname" = "sampleID")) %>%
+  dplyr::rename(sampleID = rowname)
 
-inv_diversity_indices <- left_join(rownames_to_column(inv_diversity_indices), table_sample_info, by = c("rowname" = "sampleID")) %>%
-  rename(sampleID = rowname)
-
-inv_diversity_indices_long <- inv_diversity_indices%>%
+# create summary table for plotting
+inv_diversity_summ <- inv_diversity_indices%>%
   tidyr::pivot_longer(c(richness,evenness,shannon,simpson),
                       names_to = "indexName",
-                      values_to = "indexValue")
-
-inv_diversity_summ <- inv_diversity_indices_long%>%
-  dplyr::rename(collectDate=collectDate.x)%>%
+                      values_to = "indexValue")%>%
   group_by(siteID,collectDate,eventID,habitatType,boutNumber,indexName)%>%
   dplyr::summarize(mean = mean(indexValue),
                    n=n(),
@@ -656,55 +709,35 @@ inv_diversity_summ <- inv_diversity_indices_long%>%
   dplyr::mutate(year=substr(eventID, 6,9),
                 yearBout=paste(year,"Bout",boutNumber, sep = "."))
 
-# add in abundance
-names(inv_abundance_summ)
-names(inv_diversity_summ)
-
-inv_summ_allIndices <- inv_abundance_summ%>%
-  rename(mean=abun_M2_sum_mean,
-         sd=abun_M2_sum_sd,
-         se=abun_M2_sum_se)%>%
-  mutate(n=NA,
-         indexName="abundance")%>%
-  select(names(inv_diversity_summ))%>%
-  rbind(inv_diversity_summ)
-
-
 # produce plot to show trends within and across sites
-inv_diversity_plot <- inv_summ_allIndices%>%
-  dplyr::filter(siteID=="CUPE")%>%
+inv_richness_plot <- inv_diversity_summ%>%
+  dplyr::filter(indexName=="richness")%>%
   ggplot2::ggplot(aes(fill=habitatType, color=habitatType, y=mean, x=yearBout))+
-  # ggplot2::geom_boxplot()+
   ggplot2::geom_point(position=position_dodge(0.5), size=2)+
-  # ggplot2::geom_line(position=position_dodge(0.8), stat="identity")+
-  # ggplot2::geom_bar(position="dodge", stat="identity")+
   ggplot2::geom_errorbar(aes(ymin=mean-se, ymax=mean+se), 
                          width=0.4, alpha=3.0, linewidth=1,
                          position = position_dodge(0.5))+
-  ggplot2::facet_wrap(~indexName,
-                      scales="free_y",
-                      ncol = 1)+
+  ggplot2::facet_wrap(~siteID,ncol=1)+
   ggplot2::theme(axis.text.x = element_text(size = 10, angle = 30, 
                                             hjust = 1, vjust = 1))+
   labs(title="Mean number of macroinvertebrate taxa per bout",
        y= "Taxon Richness", x = "Bout")
 
-inv_diversity_plot
+inv_richness_plot
 
 ```
 
-### AIS Timeseries
+### AIS Continuous discharge timseries
 
-Let's take a closer look at continuous discharge with the y-axis in log
-format. We will stack sites with one column to view the hydrographs for each 
-site on the same timeseries.
+Now, let's visualize the cleaned and gap-filled continuous discharge timeseries
+for the two NEON D04 sites.
 
 ```{r csd-plot}
-CSD_plot <- CSD_30min%>%
+CSD_plot <- CSD_15min%>%
   ggplot2::ggplot(aes(x=roundDate,y=dischargeMean))+
   ggplot2::geom_line()+
   ggplot2::facet_wrap(~siteID,ncol = 1)+
-  # ggplot2::scale_y_log10()+
+  # ggplot2::scale_y_log10()+ # Include to show discharge axis in log scale
   labs(title="Continuous Discharge for Water Years 2022-2024",
        y= "Discharge (L/s)", x = "Date")
 
@@ -712,7 +745,7 @@ CSD_plot
 
 ```
 
-## Join and Visualize AOS and AIS Data Together
+## Visualize AOS and AIS Data Together
 
 Next, we will use the R package `plotly` to make fun interactive plots allowing
 us to view AOS and AIS data in the same plotting field. There is a
@@ -727,186 +760,107 @@ The `plotly` package allows us to interact with the plots in the following ways:
 traces are defaulted to off)
 * Scroll long each individual y-axis
 
-### CUPE: INV Abundance and Richness + Discharge Over Time
+### INV Abundance and Richness + Discharge Over Time
 
-```{r aos-ais-plot-cupe, out.width='100%', out.height='600px'}
-# begin the plot code
-AOS_AIS_plot_CUPE <- CSD_30min%>%
-  dplyr::filter(siteID=="CUPE")%>%
-  plotly::plot_ly()%>%
-  # add trace for continuous discharge
-  plotly::add_trace(x=~roundDate,y=~dischargeMean,
-                    type="scatter",mode="line",
-                    line=list(color = 'darkgray'),
-                    name="Discharge")%>%
-  # add trace for INV abundance
-  plotly::add_trace(data=inv_abundance_summ%>%
-                      dplyr::filter(siteID=="CUPE"),
-                    x=~collectDate,y=~abun_M2_sum_mean,
-                    # split=~paste0("INV Abundance: ",samplerType),
-                    split=~paste0("INV Abundance: ",habitatType),
-                    yaxis="y2",type="scatter",mode="markers",
-                    error_y=~list(array=abun_M2_sum_se,
-                                  color='darkorange'),
-                    marker=list(color="darkorange"),
-                    visible="legendonly")%>%
-  # add trace for INV richness
-  plotly::add_trace(data=inv_richness_summ%>%
-                      dplyr::filter(siteID=="CUPE"),
-                    x=~collectDate,y=~mean_count,
-                    # split=~paste0("INV Richness: ",samplerType),
-                    split=~paste0("INV Richness: ",habitatType),
-                    yaxis="y3",type="scatter",mode="markers",
-                    error_y=~list(array=se,
-                                  color='darkgreen'),
-                    marker=list(color="darkgreen"),
-                    visible="legendonly")%>%
-  # define the layout of the plot
-  plotly::layout(
-    title = "CUPE Discharge w/ Macroinvertebrate Abundance & Richness",
-    # format x-axis
-    xaxis=list(title="dateTime",
-               automargin=TRUE,
-               domain=c(0,0.9)),
-    # format first y-axis
-    yaxis=list(
-      side='left',
-      title='Discharge (L/s)',
-      showgrid=FALSE,
-      zeroline=FALSE,
-      automargin=TRUE),
-    # format second y-axis
-    yaxis2=list(
-      side='right',
-      overlaying="y",
-      title='INV Abundance',
-      showgrid=FALSE,
-      automargin=TRUE,
-      zeroline=FALSE,
-      tickfont=list(color = 'darkorange'),
-      titlefont=list(color = 'darkorange')),
-    # format third y-axis
-    yaxis3=list(
-      side='right',
-      overlaying="y",
-      anchor="free",
-      title='INV Richness',
-      showgrid=FALSE,
-      zeroline=FALSE,
-      automargin=TRUE,
-      tickfont=list(color = 'darkgreen'),
-      titlefont=list(color = 'darkgreen'),
-      position=0.99),
-    # format legend
-    legend=list(xanchor = 'center',
-                yanchor = 'top',
-                orientation = 'h',
-                x=0.5,y=-0.2),
-    # add button to switch discharge between linear and log
-    updatemenus=list(
-      list(
-        type='buttons',
-        buttons=list(
-          list(label='linear',
-            method='relayout',
-            args=list(list(yaxis=list(type='linear')))),
-          list(label='log',
-            method='relayout',
-            args=list(list(yaxis=list(type='log'))))))))
+```{r aos-ais-plot, out.width='100%', out.height='600px'}
+# choose the site(s) you want to plot
+siteToPlot <- c("CUPE","GUIL")
 
+for(s in 1:length(siteToPlot)){
+  # begin the plot code
+  AOS_AIS_plot <- CSD_15min%>%
+    dplyr::filter(siteID==siteToPlot[s])%>%
+    plotly::plot_ly()%>%
+    # add trace for continuous discharge
+    plotly::add_trace(x=~roundDate,y=~dischargeMean,
+                      type="scatter",mode="line",
+                      line=list(color = 'darkgray'),
+                      name="Discharge")%>%
+    # add trace for INV abundance
+    plotly::add_trace(data=inv_abundance_summ%>%
+                        dplyr::filter(siteID==siteToPlot[s]),
+                      x=~collectDate,y=~abun_M2_sum_mean,
+                      split=~paste0("INV Abundance: ",habitatType),
+                      yaxis="y2",type="scatter",mode="line",
+                      error_y=~list(array=abun_M2_sum_se,
+                                    color='darkorange'),
+                      marker=list(color="darkorange"),
+                      line=list(color="darkorange"),
+                      visible="legendonly")%>%
+    # add trace for INV richness
+    plotly::add_trace(data=inv_diversity_summ%>%
+                        dplyr::filter(siteID==siteToPlot[s]
+                                      &indexName=="richness"),
+                      x=~collectDate,y=~mean,
+                      split=~paste0("INV Richness: ",habitatType),
+                      yaxis="y3",type="scatter",mode="line",
+                      error_y=~list(array=se,
+                                    color='darkgreen'),
+                      marker=list(color="darkgreen"),
+                      line=list(color="darkgreen"),
+                      visible="legendonly")%>%
+    # define the layout of the plot
+    plotly::layout(
+      title = paste0(siteToPlot[s],
+                     " Discharge w/ Macroinvertebrate Abundance & Richness"),
+      # format x-axis
+      xaxis=list(title="dateTime",
+                 automargin=TRUE,
+                 domain=c(0,0.9)),
+      # format first y-axis
+      yaxis=list(
+        side='left',
+        title='Discharge (L/s)',
+        showgrid=FALSE,
+        zeroline=FALSE,
+        automargin=TRUE),
+      # format second y-axis
+      yaxis2=list(
+        side='right',
+        overlaying="y",
+        title='INV Abundance',
+        showgrid=FALSE,
+        automargin=TRUE,
+        zeroline=FALSE,
+        tickfont=list(color = 'darkorange'),
+        titlefont=list(color = 'darkorange')),
+      # format third y-axis
+      yaxis3=list(
+        side='right',
+        overlaying="y",
+        anchor="free",
+        title='INV Richness',
+        showgrid=FALSE,
+        zeroline=FALSE,
+        automargin=TRUE,
+        tickfont=list(color = 'darkgreen'),
+        titlefont=list(color = 'darkgreen'),
+        position=0.99),
+      # format legend
+      legend=list(xanchor = 'center',
+                  yanchor = 'top',
+                  orientation = 'h',
+                  x=0.5,y=-0.2),
+      # add button to switch discharge between linear and log
+      updatemenus=list(
+        list(
+          type='buttons',
+          buttons=list(
+            list(label='linear',
+              method='relayout',
+              args=list(list(yaxis=list(type='linear')))),
+            list(label='log',
+              method='relayout',
+              args=list(list(yaxis=list(type='log'))))))))
+  
+  assign(paste0("AOS_AIS_plot_",siteToPlot[s]),AOS_AIS_plot)
+}
+
+# show plot at CUPE
 AOS_AIS_plot_CUPE
 
-```
-
-### GUIL: INV Abundance and Richness + Discharge Over Time
-
-```{r aos-ais-plot-guil, out.width='100%', out.height='600px'}
-# begin the plot code
-AOS_AIS_plot_GUIL <- CSD_30min%>%
-  dplyr::filter(siteID=="GUIL")%>%
-  plotly::plot_ly()%>%
-  # add trace for continuous discharge
-  plotly::add_trace(x=~roundDate,y=~dischargeMean,
-                    type="scatter",mode="line",
-                    line=list(color = 'darkgray'),
-                    name="Discharge")%>%
-  # add trace for INV abundance
-  plotly::add_trace(data=inv_abundance_summ%>%
-                      dplyr::filter(siteID=="GUIL"),
-                    x=~collectDate,y=~abun_M2_sum_mean,
-                    # split=~paste0("INV Abundance: ",samplerType),
-                    split=~paste0("INV Abundance: ",habitatType),
-                    yaxis="y2",type="scatter",mode="markers",
-                    error_y=~list(array=abun_M2_sum_se,
-                                  color='darkorange'),
-                    marker=list(color="darkorange"),
-                    visible="legendonly")%>%
-  # add trace for INV richness
-  plotly::add_trace(data=inv_richness_summ%>%
-                      dplyr::filter(siteID=="GUIL"),
-                    x=~collectDate,y=~mean_count,
-                    # split=~paste0("INV Richness: ",samplerType),
-                    split=~paste0("INV Richness: ",habitatType),
-                    yaxis="y3",type="scatter",mode="markers",
-                    error_y=~list(array=se,
-                                  color='darkgreen'),
-                    marker=list(color="darkgreen"),
-                    visible="legendonly")%>%
-  # define the layout of the plot
-  plotly::layout(
-    title = "GUIL Discharge w/ Macroinvertebrate Abundance & Richness",
-    # format x-axis
-    xaxis=list(title="dateTime",
-               automargin=TRUE,
-               domain=c(0,0.9)),
-    # format first y-axis
-    yaxis=list(
-      side='left',
-      title='Discharge (L/s)',
-      showgrid=FALSE,
-      zeroline=FALSE,
-      automargin=TRUE),
-    # format second y-axis
-    yaxis2=list(
-      side='right',
-      overlaying="y",
-      title='INV Abundance',
-      showgrid=FALSE,
-      automargin=TRUE,
-      zeroline=FALSE,
-      tickfont=list(color = 'darkorange'),
-      titlefont=list(color = 'darkorange')),
-    # format third y-axis
-    yaxis3=list(
-      side='right',
-      overlaying="y",
-      anchor="free",
-      title='INV Richness',
-      showgrid=FALSE,
-      zeroline=FALSE,
-      automargin=TRUE,
-      tickfont=list(color = 'darkgreen'),
-      titlefont=list(color = 'darkgreen'),
-      position=0.99),
-    # format legend
-    legend=list(xanchor = 'center',
-                yanchor = 'top',
-                orientation = 'h',
-                x=0.5,y=-0.2),
-    # add button to switch discharge between linear and log
-    updatemenus=list(
-      list(
-        type='buttons',
-        buttons=list(
-          list(label='linear',
-            method='relayout',
-            args=list(list(yaxis=list(type='linear')))),
-          list(label='log',
-            method='relayout',
-            args=list(list(yaxis=list(type='log'))))))))
-
+# show plot at GUIL
 AOS_AIS_plot_GUIL
-
 ```
 
 Now, we can take what we have learned about NEON AOS and AIS data and look at
