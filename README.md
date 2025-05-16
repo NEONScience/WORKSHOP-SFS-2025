@@ -7,7 +7,7 @@ This repository contains the code that will be used for the Society for Freshwat
 1. Optional, but very helpful! Create an API token using the instructions in the following tutorial, which shouldn’t take more than 10 minutes (https://www.neonscience.org/resources/learning-hub/tutorials/neon-api-tokens-tutorial)
 2. Ensure that you have R version >3.6 installed on your computer.
 3. The tutorial leaders will use RStudio, which is also recommended, but optional. Download available at: https://posit.co/download/rstudio-desktop/
-4. Install required packages: neonUtilities, ggplot2, lubridate, plyr. Feel free to use lines ____ of the ____ script in this repository.
+4. Install required packages: neonUtilities, neonOS, tidyverse, plotly, vegan, base64enc.
 
 <!-- ****** Agenda ****** -->
 
@@ -15,7 +15,22 @@ This repository contains the code that will be used for the Society for Freshwat
 
 1:00 pm - Introductions and Overview
 
-?
+1:10 - Presentation: Overview of NEON Aquatics
+
+1:30 - Code-along: Part 1
+
+- Download NEON AOS and AIS data products
+- Understand the contents of NEON data download packages
+- Wrangling NEON AOS and AIS data products
+
+2:30 - Time for break + discussion
+
+2:45 - Code-along: Part 2
+
+- Integrating NEON AOS and AIS data products
+- Case studies using data from NEON's Atlantic Neotropical Domain (D04, Puerto Rico)
+
+4:00 - Time for discussion, questions, exploring NEON data, etc.
 
 5:00 pm - Adjourn
 
@@ -41,16 +56,16 @@ Teaching Modules:
 
 Spatial data and maps: <https://neon.maps.arcgis.com/home/index.html>
 
-Walker Branch NEON (WALK) site page:
-<https://www.neonscience.org/field-sites/walk> <br /> Note: Just
+Rio Cupeyes NEON (CUPE) site page:
+<https://www.neonscience.org/field-sites/cupe> <br /> Note: Just
 substitute the 4-letter site code at the end of the url to see any other
 site page.
 
 NEON data portal: <https://data.neonscience.org/>
 
 NEONScience GitHub repo: <https://github.com/NEONScience> <br /> ASLO
-2025 AIS Workshop GitHub repo:
-<https://github.com/NEONScience/WORKSHOP-ASLO-2025>
+2025 SFS Workshop GitHub repo:
+<https://github.com/NEONScience/WORKSHOP-SFS-2025>
 
 <!-- ****** Usage ****** -->
 

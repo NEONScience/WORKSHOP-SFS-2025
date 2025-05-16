@@ -1,41 +1,24 @@
 ---
-title: "Linking NEON aquatic observational and instrument data to answer critical questions in aquatic ecology at the continental scale"
-dateCreated: 2025-04-28
-authors: Zachary Nickerson, Stephanie Parker, Bobby Hensley, Nick Harrison
-estimatedTime: 2 hours
-packagesLibraries: neonUtilities, ggplot2, lubridate, plyr
+syncID: 
+title: "Linking NEON aquatic observational and instrument data to answer critical questions in aquatic ecology at the continental scale"	
+description: "Exercises highlighting NEON's Aquatic Instrumented Subsystem (AIS) and Aquatic Observational Subsystem (AOS) data products and integrating data products from the two subsystems to examine case studies from NEON Atlantic Neotropical Domain (Domain 04, Puerto Rico)."	
+dateCreated: 2025-05-16
+authors: Zachary L. Nickerson
+contributors: Stephanie M. Parker, Robert T. Hensley, Nicolas M. Harrison
+estimatedTime: 3 hours
+packagesLibraries: neonUtilities, neonOS, tidyverse, plotly, vegan, base64enc
+topics: data-manipulation, data-visualization, data-analysis
+subtopics: organisms, hydrology, chemistry, morphology, aquatic
+languagesTool: R
+dataProduct: DP1.20120.001, DP4.00130.001, DP4.00131.001, DP1.20093.001, DP1.20288.001
+code1: 
+tutorialSeries: 
+urlTitle: aquatic-data-product-integration
 editor_options: 
   chunk_output_type: inline
 ---
 
-## Introduction Links
-
-Getting started with NEON data: https://www.neonscience.org/resources/getting-started-neon-data-resources
-
-Contact us form: https://www.neonscience.org/about/contact-us
-
-Teaching Modules: https://www.neonscience.org/resources/learning-hub/teaching-modules <br />
-QUBES modules: https://qubeshub.org/community/groups/neon/educational_resources <br />
-EDDIE modules : https://serc.carleton.edu/eddie/macrosystems/index.html
-
-Spatial data and maps: https://neon.maps.arcgis.com/home/index.html
-
-NEON data portal: https://data.neonscience.org/
-
-NEONScience GitHub repo: https://github.com/NEONScience <br />
-SFS 2025 NEON Workshop GitHub repo:
-<https://github.com/NEONScience/WORKSHOP-SFS-2025>
-
-## Tutorial
-
-This tutorial covers downloading NEON Aquatic Instrument Subsystem (AIS) and 
-Aquatic Observation Subsystem (AOS) data products using the `neonUtilities` R 
-package, as well as basic instruction in beginning to explore and work with the 
-downloaded data. This includes navigating data packages documentation, 
-summarizing data for plotting and analysis, combining data within and between 
-data products, and visualizing AIS and AOS data separately and together. 
-
-<div id="ds-objectives" markdown="1"
+<!-- <div id="ds-objectives" markdown="1" -->
 
 ## Objectives
 
@@ -59,6 +42,7 @@ preferably, RStudio loaded on your computer.
 * **tidyverse**: Collection of R packages designed for data science
 * **plotly**: Tool for creating interactive, web-based visualizations
 * **vegan**: Functions for analyzing ecological data
+* **base64enc**: Tools for base64 encoding
 
 These packages are on CRAN and can be installed by 
 `install.packages()`.
@@ -67,6 +51,37 @@ These packages are on CRAN and can be installed by
 
 * <a href="https://github.com/NEONScience/NEON-Utilities/neonUtilities" target="_blank">GitHub repository for neonUtilities</a>
 * <a href="https://github.com/NEONScience/NEON-OS-data-processing" target="_blank">GitHub repository for neonOS</a>
+
+<!-- </div> -->
+
+## Introduction
+
+### Tutorial Overview
+
+This tutorial covers downloading NEON Aquatic Instrument Subsystem (AIS) and 
+Aquatic Observation Subsystem (AOS) data products using the `neonUtilities` R 
+package, as well as basic instruction in beginning to explore and work with the 
+downloaded data. This includes navigating data packages documentation, 
+summarizing data for plotting and analysis, combining data within and between 
+data products, and visualizing AIS and AOS data separately and together. 
+
+### Helpful Links
+
+Getting started with NEON data: https://www.neonscience.org/resources/getting-started-neon-data-resources
+
+Contact us form: https://www.neonscience.org/about/contact-us
+
+Teaching Modules: https://www.neonscience.org/resources/learning-hub/teaching-modules <br />
+QUBES modules: https://qubeshub.org/community/groups/neon/educational_resources <br />
+EDDIE modules : https://serc.carleton.edu/eddie/macrosystems/index.html
+
+Spatial data and maps: https://neon.maps.arcgis.com/home/index.html
+
+NEON data portal: https://data.neonscience.org/
+
+NEONScience GitHub repo: https://github.com/NEONScience <br />
+SFS 2025 NEON Workshop GitHub repo:
+<https://github.com/NEONScience/WORKSHOP-SFS-2025>
 
 ## Download Files and Load Directly to R: loadByProduct()
 
@@ -86,6 +101,7 @@ analysis.
 ```{r setup, include=FALSE}
 require(knitr)
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
 ```
 
 ```{r set-up-env, eval=F}
@@ -95,6 +111,8 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 # install.packages("tidyverse")
 # install.packages("plotly")
 # install.packages("vegan")
+# install.packages("base64enc")
+
 ```
 
 ```{r load-packages}
@@ -107,6 +125,8 @@ library(neonOS)
 library(tidyverse)
 library(plotly)
 library(vegan)
+library(base64enc)
+
 ```
 
 The inputs to `loadByProduct()` control which data to download and how 
@@ -559,7 +579,7 @@ sampler_habitat_summ
 
 # using the `tidyverse` collection, we can clean the data in one piped function
 inv_abundance_summ <- inv_fieldTaxJoined%>%
-  # remove events when no samples were collected (samplingImpractial)
+  # remove events when no samples were collected (samplingImpractical)
   # remove samples not associated with a bout
   dplyr::filter(is.na(samplingImpractical)
                 &!grepl("GRAB|BRYOZOAN",sampleID))%>%
@@ -603,7 +623,7 @@ inv_abundance_plot
 ### PLOT RICHNESS ###
 
 inv_richness_clean <- inv_fieldTaxJoined%>%
-  # remove events when no samples were collected (samplingImpractial)
+  # remove events when no samples were collected (samplingImpractical)
   # remove samples not associated with a bout
   dplyr::filter(is.na(samplingImpractical)
                 &!grepl("GRAB|BRYOZOAN",sampleID))%>%
@@ -873,7 +893,7 @@ one to easily run the same analysis for any NEON site. Given that all of NEON's
 24 stream sites publish both AIS continuous discharge and AOS macroinvertebrate
 collection data products, users can substitute any two NEON stream site IDs into
 this exercise to assess the relationship between stream discharge and
-macroinvertebrate abundacne and richness.
+macroinvertebrate abundance and richness.
 
 Visit the [Explore NEON Field Sites](https://www.neonscience.org/field-sites/explore-field-sites)
 webpage to learn more about the different NEON aquatic sites. To run this 
@@ -1079,7 +1099,7 @@ for(e in 1:length(unique(geo_pebbleCount_freq$eventID))){
   }
 }
 
-# assign a year to each survye
+# assign a year to each survey
 geo_pebbleCount_freqCumm <- geo_pebbleCount_freqCumm%>%
   dplyr::mutate(year=format(surveyEndDate,"%Y"))
 
@@ -1334,11 +1354,11 @@ fDOM_15min <- WAQ_102%>%
   group_by(siteID,roundDate)%>%
   summarize(mean_fDOM=mean(rawCalibratedfDOM))
 
-# plot a timesereis of fDOM
+# plot a timeseries of fDOM
 fDOM_plot <- fDOM_15min%>%
   ggplot2::ggplot(aes(x=roundDate,y=mean_fDOM))+
   ggplot2::geom_line()+
-  ggplot2::labs(title = "Flourescent dissolved organic matter (fDOM) over time",
+  ggplot2::labs(title = "fluorescent dissolved organic matter (fDOM) over time",
                 y = "fDOM (QSU)",
                 x = "Date")
 
@@ -1368,7 +1388,7 @@ model <- lm(analyteConcentration~mean_fDOM,data=fDOM_DOC_join)
 # view a summary of the regression model
 print(summary(model))
 
-# show a plot of the relationship with a linear treadline added
+# show a plot of the relationship with a linear trendline added
 fDOM_DOC_plot <- fDOM_DOC_join%>%
   ggplot2::ggplot(aes(x=mean_fDOM,y=analyteConcentration))+
   ggplot2::geom_point()+
